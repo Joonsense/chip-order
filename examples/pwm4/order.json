@@ -1,0 +1,12 @@
+{
+  "name": "pwm4",
+  "title": "4 channel PWM controller",
+  "description": "Four 8-bit PWM outputs with a shared counter (chip-lab order flow)",
+  "tiles": "1x1",
+  "pinout": {
+    "ui[0]": "DUTY0", "ui[1]": "DUTY1", "ui[2]": "DUTY2", "ui[3]": "DUTY3",
+    "ui[4]": "DUTY4", "ui[5]": "DUTY5", "ui[6]": "DUTY6", "ui[7]": "DUTY7",
+    "uo[0]": "PWM0", "uo[1]": "PWM1", "uo[2]": "PWM2", "uo[3]": "PWM3",
+    "uio[0]": "WE", "uio[1]": "CH0", "uio[2]": "CH1"
+  }
+}

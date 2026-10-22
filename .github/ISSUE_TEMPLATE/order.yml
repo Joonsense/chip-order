@@ -1,0 +1,58 @@
+name: Chip order
+description: Order a Tiny Tapeout design from a spec and a cycle-level Python model
+title: "Order: "
+labels: ["order"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check your model first in the browser at https://joonsense.github.io/chip-order/#try (it fills this form for you).
+        Everything in this issue is public. The delivered repository is Apache 2.0.
+  - type: input
+    id: name
+    attributes:
+      label: Design name
+      description: Short, lowercase, becomes the top module tt_um_joonsense_<name>
+      placeholder: pwm4
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: spec.md
+      description: Pins, protocol, reset behaviour in plain English
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: model
+    attributes:
+      label: model.py
+      description: "class Model with reset() and cycle(ui_in, uio_in) -> (uo_out, uio_out, uio_oe). Optional stimulus(rng, cycles) and CYCLES."
+      render: python
+    validations:
+      required: true
+  - type: dropdown
+    id: tiles
+    attributes:
+      label: Largest tile size you accept
+      options: ["1x1", "1x2", "2x2"]
+      default: 0
+  - type: textarea
+    id: rtl
+    attributes:
+      label: Your own Verilog (optional)
+      description: If you paste RTL, it is verified as is and the agent is not used
+      render: verilog
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Pin names for the datasheet, target shuttle, whether you need it private
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Terms
+      options:
+        - label: I understand this order and its results are public, and the design is delivered under Apache 2.0. Fabrication is paid to Tiny Tapeout by me, if I choose to fabricate.
+          required: true

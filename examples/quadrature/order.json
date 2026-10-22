@@ -1,0 +1,12 @@
+{
+  "name": "quadrature",
+  "title": "Quadrature encoder decoder",
+  "description": "Rotary encoder decoder with synchronizer, 8-bit count and sticky error flag (chip-lab order flow)",
+  "tiles": "1x1",
+  "pinout": {
+    "ui[0]": "A", "ui[1]": "B",
+    "uo[0]": "COUNT0", "uo[1]": "COUNT1", "uo[2]": "COUNT2", "uo[3]": "COUNT3",
+    "uo[4]": "COUNT4", "uo[5]": "COUNT5", "uo[6]": "COUNT6", "uo[7]": "COUNT7",
+    "uio[0]": "CLEAR", "uio[7]": "ERROR"
+  }
+}

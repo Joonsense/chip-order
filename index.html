@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chip Order</title>
+<meta name="description" content="Write your chip as a Python class. An AI agent writes the Verilog, and you only get it back after it matches your model cycle for cycle and passes the official Tiny Tapeout layout flow.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Describe the chip in Python. Get back a tapeout ready repo.">
+<meta property="og:description" content="An AI agent writes the Verilog. It ships only after it matches your cycle-level model bit for bit, survives mutation testing and passes the Tiny Tapeout gds, precheck and gate level flow.">
+<meta property="og:image" content="https://joonsense.github.io/chip-order/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://joonsense.github.io/chip-order/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --wafer: #e7ebef; --sheet: #f4f6f8; --ink: #141a22; --ink-2: #4a5462; --ink-3: #6c7684; --rule: #c6cdd6;
+  --met1: #2f5bd3; --met2: #9a47b0; --diff: #2f8f57; --poly: #c9473c; --amber: #b7791f;
+  --panel: #14171c; --panel-2: #1c2027; --panel-ink: #d4dae2; --panel-dim: #7f8996; --panel-rule: #2a2f37;
+  --focus: #2f5bd3; --code-bg: #0f1216;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wafer: #11151b; --sheet: #161b22; --ink: #e8ecf1; --ink-2: #a3adba; --ink-3: #7f8996; --rule: #2a313b;
+    --met1: #7d9cff; --met2: #c47ddb; --diff: #4cc283; --poly: #ff7a6e; --amber: #e0a84a; --focus: #8eabff;
+  }
+}
+:root[data-theme="dark"] {
+  --wafer: #11151b; --sheet: #161b22; --ink: #e8ecf1; --ink-2: #a3adba; --ink-3: #7f8996; --rule: #2a313b;
+  --met1: #7d9cff; --met2: #c47ddb; --diff: #4cc283; --poly: #ff7a6e; --amber: #e0a84a; --focus: #8eabff;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--wafer); color: var(--ink); font: 17px/1.55 "Schibsted Grotesk", system-ui, sans-serif; }
+code, pre, textarea, .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--met1); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, textarea:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+header.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-size: 15px; color: var(--ink-2); }
+header.top b { color: var(--ink); font-weight: 800; letter-spacing: -0.01em; }
+header.top nav { display: flex; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+header.top nav a { color: var(--ink-2); text-decoration: none; }
+header.top nav a:hover { color: var(--ink); }
+.mark { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; vertical-align: -5px; border-radius: 5px; background: var(--ink); }
+.mark i { width: 10px; height: 10px; border: 2px solid var(--wafer); border-radius: 2px; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr); gap: 56px; align-items: center; padding: 40px 0 72px; }
+.eyebrow { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--met1); margin: 0 0 18px; }
+h1 { font-size: clamp(40px, 5.6vw, 68px); line-height: .98; letter-spacing: -0.04em; margin: 0 0 24px; font-weight: 800; }
+h1 em { font-style: normal; color: var(--met1); }
+.lede { font-size: 20px; color: var(--ink-2); margin: 0 0 30px; max-width: 34em; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 16px; font-weight: 500; border-radius: 999px; padding: 12px 20px; cursor: pointer; text-decoration: none; border: 1px solid var(--ink); background: var(--ink); color: var(--wafer); }
+.btn:hover { opacity: .9; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+.btn.ghost:hover { border-color: var(--ink-2); }
+.small { font-size: 14px; color: var(--ink-3); }
+
+/* order card */
+.card { background: var(--panel); color: var(--panel-ink); border-radius: 20px; padding: 22px 22px 18px; box-shadow: 0 40px 70px -40px rgba(10,14,20,.6); border: 1px solid transparent; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card { border-color: var(--panel-rule); } }
+:root[data-theme="dark"] .card { border-color: var(--panel-rule); }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 13px; color: var(--panel-dim); margin-bottom: 14px; }
+.card-head b { color: #fff; font-size: 15px; font-weight: 700; }
+.files { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.file { background: var(--panel-2); border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.5; overflow: hidden; }
+.file .name { color: var(--panel-dim); font-size: 11px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.file pre { margin: 0; white-space: pre; color: #c5cdd8; font-size: 11.5px; line-height: 1.5; }
+.file pre .k { color: #8eabff; } .file pre .c { color: #6b7480; } .file pre .n { color: #e0a84a; }
+.stages { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.stage { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; font-size: 14px; }
+.stage .tick { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #3a414b; display: grid; place-items: center; transition: background .25s, border-color .25s; }
+.stage .tick svg { width: 10px; height: 10px; opacity: 0; transition: opacity .2s; }
+.stage.done .tick { background: #2f8f57; border-color: #2f8f57; }
+.stage.done .tick svg { opacity: 1; }
+.stage.run .tick { border-color: #8eabff; border-top-color: transparent; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.stage .what { color: var(--panel-ink); }
+.stage .what small { display: block; color: var(--panel-dim); font-size: 12px; }
+.stage .val { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--panel-dim); text-align: right; white-space: nowrap; }
+.stage.done .val { color: #e8ecf1; }
+.card-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--panel-rule); font-size: 13px; color: var(--panel-dim); }
+.card-foot a { color: #8eabff; }
+.status { display: inline-flex; align-items: center; gap: 8px; color: #fff; font-weight: 500; }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: #4cc283; box-shadow: 0 0 0 4px rgba(76,194,131,.18); }
+
+/* proof strip */
+.proof { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.proof div { padding: 22px 20px 22px 0; }
+.proof div + div { padding-left: 20px; border-left: 1px solid var(--rule); }
+.proof b { display: block; font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+.proof span { font-size: 14px; color: var(--ink-2); }
+
+section { padding: 84px 0 0; }
+h2 { font-size: clamp(30px, 3.6vw, 42px); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 14px; font-weight: 800; }
+.sub { font-size: 18px; color: var(--ink-2); max-width: 44em; margin: 0 0 34px; }
+
+/* try */
+.lab { color-scheme: dark; background: var(--panel); color: var(--panel-ink); border-radius: 20px; overflow: hidden; border: 1px solid transparent; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lab { border-color: var(--panel-rule); } }
+:root[data-theme="dark"] .lab { border-color: var(--panel-rule); }
+.lab-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--panel-rule); flex-wrap: wrap; }
+.tabs { display: flex; gap: 4px; }
+.tab { font: 500 13px "JetBrains Mono", monospace; color: var(--panel-dim); background: transparent; border: 0; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--panel-2); color: #fff; }
+.lab-bar label { font-size: 13px; color: var(--panel-dim); display: inline-flex; gap: 8px; align-items: center; }
+select, .lab input[type=number] { font: 13px "Schibsted Grotesk", sans-serif; background: var(--panel-2); color: #e8ecf1; border: 1px solid var(--panel-rule); border-radius: 8px; padding: 6px 8px; }
+.lab input[type=number] { width: 76px; font-family: "JetBrains Mono", monospace; }
+.lab-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); min-height: 520px; }
+.editor { position: relative; border-right: 1px solid var(--panel-rule); background: var(--code-bg); }
+.editor textarea { display: block; width: 100%; height: 100%; min-height: 520px; resize: none; border: 0; background: transparent; color: #d6dde6; padding: 16px 16px 16px 18px; font-size: 13px; line-height: 1.6; tab-size: 4; white-space: pre; overflow: auto; }
+.editor textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.side { display: flex; flex-direction: column; min-width: 0; }
+.runbar { display: flex; gap: 10px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--panel-rule); flex-wrap: wrap; }
+.runbar .go { font: inherit; font-size: 15px; font-weight: 700; border-radius: 999px; padding: 9px 18px; border: 0; background: #e8ecf1; color: #101317; cursor: pointer; }
+.runbar .go:disabled { opacity: .6; cursor: progress; }
+.runbar .order { font: inherit; font-size: 15px; font-weight: 500; border-radius: 999px; padding: 8px 16px; border: 1px solid #3a414b; background: transparent; color: #e8ecf1; cursor: pointer; }
+.runbar .order:disabled { opacity: .45; cursor: not-allowed; }
+.runmsg { font-size: 13px; color: var(--panel-dim); flex: 1 1 200px; min-width: 0; }
+.runmsg.ok { color: #7ee2a8; } .runmsg.err { color: #ff8f84; }
+.wave { flex: 1; padding: 10px 6px 6px 0; overflow: hidden; position: relative; }
+.wave svg { display: block; width: 100%; }
+.wave .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--panel-dim); font-size: 15px; }
+.wave-ctl { display: flex; gap: 12px; align-items: center; padding: 10px 16px 14px; border-top: 1px solid var(--panel-rule); font-size: 12px; color: var(--panel-dim); }
+.wave-ctl input[type=range] { flex: 1; accent-color: #8eabff; }
+.errbox { margin: 0 16px 14px; padding: 12px 14px; border-radius: 10px; background: rgba(255,90,80,.1); border: 1px solid rgba(255,120,110,.35); color: #ffb4ad; font: 12.5px/1.5 "JetBrains Mono", monospace; white-space: pre-wrap; display: none; }
+.lab-note { font-size: 14px; color: var(--ink-3); margin: 14px 2px 0; }
+
+/* how */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; }
+.step { background: var(--sheet); padding: 24px 22px 26px; }
+.step .n { font: 500 13px "JetBrains Mono", monospace; color: var(--ink-3); }
+.step h3 { margin: 8px 0 8px; font-size: 20px; letter-spacing: -0.01em; }
+.step p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+.step .catches { margin-top: 12px; font-size: 13.5px; color: var(--ink-3); }
+.step .catches b { color: var(--poly); font-weight: 700; }
+
+/* examples */
+.ex { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.exc { background: var(--sheet); border: 1px solid var(--rule); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+.exc h3 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+.exc .who { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.who.hand { color: var(--met2); } .who.agent { color: var(--diff); }
+.exc p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+.exc table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.exc td { padding: 7px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+.exc td:first-child { color: var(--ink-2); padding-right: 12px; }
+.exc td:last-child { text-align: right; font-family: "JetBrains Mono", monospace; font-size: 13px; }
+.exc .links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 15px; margin-top: auto; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; min-height: 20px; }
+.badges img { height: 20px; }
+
+/* order */
+.offer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.box { background: var(--sheet); border: 1px solid var(--rule); border-radius: 16px; padding: 26px; }
+.box.dark { background: var(--panel); color: var(--panel-ink); border-color: transparent; }
+.box.dark .small { color: var(--panel-dim); }
+.box h3 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.02em; }
+.price { font-size: 46px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin: 6px 0 4px; }
+.box ul { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 15.5px; }
+.box li { padding-left: 22px; position: relative; }
+.box li::before { content: ""; position: absolute; left: 0; top: .6em; width: 10px; height: 2px; background: var(--diff); }
+.box.dark li::before { background: #4cc283; }
+.box ol { margin: 14px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15.5px; color: var(--ink-2); }
+.box .btn { margin-top: 20px; }
+.box.dark .btn { background: #e8ecf1; color: #101317; border-color: #e8ecf1; }
+
+/* faq */
+.faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
+.faq details { border-top: 1px solid var(--rule); padding: 16px 0; }
+.faq summary { cursor: pointer; font-weight: 700; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--ink-3); font-weight: 400; }
+.faq details[open] summary::after { content: "–"; }
+.faq p { margin: 10px 0 0; color: var(--ink-2); font-size: 15.5px; }
+
+footer { margin-top: 96px; padding: 28px 0 40px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--ink-3); }
+footer a { color: var(--ink-2); }
+
+@media (max-width: 920px) {
+  .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 20px; }
+  .lab-grid { grid-template-columns: 1fr; }
+  .editor { border-right: 0; border-bottom: 1px solid var(--panel-rule); }
+  .editor textarea { min-height: 340px; height: 340px; }
+  .steps { grid-template-columns: 1fr; }
+  .ex, .offer, .faq { grid-template-columns: 1fr; }
+  .proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .proof div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .proof div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+}
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  header.top nav a:not(.keep) { display: none; }
+  .files { grid-template-columns: 1fr; }
+  .file:nth-child(2) { display: none; }
+  .stage { font-size: 13px; }
+  .stage .what small { display: none; }
+  .proof b { font-size: 28px; }
+  section { padding-top: 64px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span><span class="mark" aria-hidden="true"><i></i></span><b>Chip Order</b> &nbsp;by Kai Kim Labs</span>
+    <nav aria-label="Sections">
+      <a href="#try" class="keep">Try it</a>
+      <a href="#how">How it works</a>
+      <a href="#examples">Examples</a>
+      <a href="#order" class="keep">Order</a>
+    </nav>
+  </header>
+
+  <main>
+  <div class="hero">
+    <div>
+      <p class="eyebrow">Custom chips on Tiny Tapeout · sky130</p>
+      <h1>Describe the chip in Python. Get back a <em>tapeout ready</em> repo.</h1>
+      <p class="lede">You write a cycle-level Python model of what the chip should do. An AI agent writes the Verilog. You only get it back after it matches your model bit for bit, catches injected faults, and passes the official Tiny Tapeout layout flow.</p>
+      <div class="cta">
+        <a class="btn" href="#try">Run your model in the browser</a>
+        <a class="btn ghost" href="#order">Order a design</a>
+      </div>
+      <p class="small" style="margin-top:16px">Pilot: the first 10 orders are free. Next shuttle closes <b class="num">2026-11-30</b>.</p>
+    </div>
+
+    <div class="card" id="card" aria-label="A real order, replayed">
+      <div class="card-head"><b>Order: 4 channel PWM</b><span class="mono">tt_um_joonsense_pwm4</span></div>
+      <div class="files" aria-hidden="true">
+        <div class="file"><div class="name"><span>spec.md</span><span>you</span></div><pre>Four 8 bit PWM outputs
+sharing one free running
+counter. Pulse WE to load
+a duty value...</pre></div>
+        <div class="file"><div class="name"><span>model.py</span><span>you</span></div><pre><span class="k">def</span> cycle(self, ui, uio):
+  out = sum(<span class="n">1</span> &lt;&lt; ch <span class="k">for</span> ch
+    <span class="k">in</span> range(<span class="n">4</span>) <span class="k">if</span>
+    self.counter &lt; self.duty[ch])</pre></div>
+      </div>
+      <ol class="stages" id="stages">
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Verilator lint <small>-Wall, errors block delivery</small></span><span class="val">0 warnings</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">RTL vs your model <small>every clock, 3 seeds, reset mid run</small></span><span class="val num">8,997 / 8,997</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Synthesized netlist vs model <small>Yosys gates, same test</small></span><span class="val num">8,997 / 8,997</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Mutation test <small>broken copies of the RTL must fail</small></span><span class="val num">5 / 5 caught</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">sky130 fit <small>calibrated on 11 real layouts</small></span><span class="val num">1x1 tile</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Tiny Tapeout gds · precheck · gate level <small>DRC 0 · LVS 0 · antenna 0</small></span><span class="val num">+11.33 ns @ 50 MHz</span></li>
+      </ol>
+      <div class="card-foot"><span class="status"><i></i>Delivered</span><a href="https://github.com/Joonsense/tt-order-pwm4">github.com/Joonsense/tt-order-pwm4</a></div>
+    </div>
+  </div>
+
+  <div class="proof" aria-label="Track record">
+    <div><b class="num">8</b><span>designs through the official Tiny Tapeout flow, all DRC 0 and LVS 0</span></div>
+    <div><b class="num">80</b><span>multiply accumulates per clock in the largest one, a digit classifier</span></div>
+    <div><b class="num">~10 s</b><span>from Verilog to a full verdict on a laptop, before any layout run</span></div>
+    <div><b class="num">€70</b><span>per 1x1 tile, paid to Tiny Tapeout if you fabricate. Our part is free in the pilot</span></div>
+  </div>
+
+  <section id="try" aria-labelledby="try-h">
+    <h2 id="try-h">Your model is the contract.</h2>
+    <p class="sub">A chip that matches a vague spec is a guess. A chip that matches your Python model on every clock is not. Write the model here, run it on random inputs, and look at the waveform before you order. This runs the same loop as the cocotb test that ships in your repo, in your browser, nothing uploaded.</p>
+
+    <div class="lab">
+      <div class="lab-bar">
+        <div class="tabs" role="tablist" aria-label="Order files">
+          <button class="tab" role="tab" id="tab-model" aria-selected="true" aria-controls="ed">model.py</button>
+          <button class="tab" role="tab" id="tab-spec" aria-selected="false" aria-controls="ed">spec.md</button>
+        </div>
+        <label>Start from
+          <select id="example" aria-label="Example order">
+            <option value="pwm4">4 channel PWM</option>
+            <option value="quadrature">Quadrature encoder decoder</option>
+            <option value="blank">Blank: 8 bit counter</option>
+          </select>
+        </label>
+      </div>
+      <div class="lab-grid">
+        <div class="editor"><textarea id="ed" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Order file editor"></textarea></div>
+        <div class="side">
+          <div class="runbar">
+            <button class="go" id="run">Run model</button>
+            <label class="small" style="color:var(--panel-dim);display:inline-flex;gap:6px;align-items:center">cycles <input type="number" id="cycles" value="512" min="16" max="20000" step="16" aria-label="Cycles to simulate"></label>
+            <button class="order" id="orderit" disabled title="Run the model first">Order this design</button>
+            <span class="runmsg" id="msg" role="status">Python loads on the first run (about 7 MB, once).</span>
+          </div>
+          <div class="errbox" id="err"></div>
+          <div class="wave" id="wave"><div class="empty">The waveform shows up here: inputs you drove, outputs your model says the chip must produce.</div></div>
+          <div class="wave-ctl"><span>cycle <b class="num" id="pos">0</b></span><input type="range" id="scroll" min="0" max="0" value="0" aria-label="Scroll waveform"><span id="win" class="num">96 shown</span><select id="zoom" aria-label="Cycles per view"><option value="48">48</option><option value="96" selected>96</option><option value="256">256</option><option value="512">512</option></select></div>
+        </div>
+      </div>
+    </div>
+    <p class="lab-note">The contract: <code>Model.reset()</code>, and <code>Model.cycle(ui_in, uio_in)</code> returns <code>(uo_out, uio_out, uio_oe)</code> as seen just before the next rising edge, then advances one clock. Optional <code>stimulus(rng, cycles)</code> yields <code>(ui_in, uio_in[, rst_n])</code> so the test drives your protocol, not noise.</p>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <h2 id="how-h">Nothing ships on the agent's word.</h2>
+    <p class="sub">The agent only writes Verilog. Your model and the test are fixed, and it cannot touch them. Every failure goes back to the agent with the first mismatching clock, the inputs, what your model expected and what the chip did.</p>
+    <div class="steps">
+      <div class="step"><span class="n">01</span><h3>You write the spec and model</h3><p>Plain English for the pins and protocol, Python for the exact behaviour, including latency. Ambiguity gets settled here, not in silicon.</p><p class="catches">Catches <b>a model that breaks its own contract</b> before any Verilog exists.</p></div>
+      <div class="step"><span class="n">02</span><h3>The agent writes RTL</h3><p>Verilog-2005 for one <code>tt_um_*</code> module with the Tiny Tapeout pins. Lint errors, mismatches and size problems go back to it, up to a fixed number of attempts.</p><p class="catches">Catches <b>lint errors, latches, wrong widths</b> via Verilator -Wall.</p></div>
+      <div class="step"><span class="n">03</span><h3>Cycle exact simulation</h3><p>The cocotb test that ships in your repo drives your stimulus every clock and compares every output pin with your model, over three seeds with a reset in the middle.</p><p class="catches">Catches <b>off by one clock, wrong reset, X on outputs</b>.</p></div>
+      <div class="step"><span class="n">04</span><h3>Same test on the gates</h3><p>Yosys synthesizes the RTL and the netlist runs the same test. Then sky130 area and 50 MHz timing are predicted with a model fitted to 11 real layouts.</p><p class="catches">Catches <b>simulation and synthesis disagreeing</b>, designs too big for the tile.</p></div>
+      <div class="step"><span class="n">05</span><h3>The test is tested</h3><p>Copies of the RTL with one operator flipped run through the test. Each one should fail. Survivors are listed in your report: either harmless or a gap in your stimulus.</p><p class="catches">Catches <b>a test that passes anything</b>.</p></div>
+      <div class="step"><span class="n">06</span><h3>Official layout flow</h3><p>Your repo runs the Tiny Tapeout gds, precheck and gate level workflows in GitHub Actions: placement, routing, DRC, LVS, antenna, timing at slow corner.</p><p class="catches">Catches <b>anything that would get a shuttle submission rejected</b>.</p></div>
+    </div>
+  </section>
+
+  <section id="examples" aria-labelledby="ex-h">
+    <h2 id="ex-h">Orders, with receipts.</h2>
+    <p class="sub">Each delivery is a public repository you can clone, re-run and submit. The badges are live GitHub Actions results, not screenshots.</p>
+    <div class="ex">
+      <article class="exc">
+        <span class="who hand">Hand written RTL, verified by the flow</span>
+        <h3>4 channel PWM controller</h3>
+        <p>Four 8 bit PWM outputs on a shared counter, duty registers loaded over the bidirectional pins.</p>
+        <div class="badges"><img alt="gds" src="https://github.com/Joonsense/tt-order-pwm4/actions/workflows/gds.yaml/badge.svg"><img alt="test" src="https://github.com/Joonsense/tt-order-pwm4/actions/workflows/test.yaml/badge.svg"></div>
+        <table>
+          <tr><td>Cycles matched</td><td class="num">8,997 RTL · 8,997 gates</td></tr>
+          <tr><td>Mutants caught</td><td class="num">5 / 5</td></tr>
+          <tr><td>Layout</td><td class="num">1x1 · 20.8% · DRC 0 · LVS 0</td></tr>
+          <tr><td>Setup slack, slow corner</td><td class="num">+11.33 ns at 50 MHz</td></tr>
+        </table>
+        <div class="links"><a href="https://github.com/Joonsense/tt-order-pwm4">Repository</a><a href="https://github.com/Joonsense/tt-order-pwm4/blob/main/REPORT.md">Report</a><a href="https://joonsense.github.io/tt-order-pwm4/">3D layout</a></div>
+      </article>
+      <article class="exc" id="ex-quad">
+        <span class="who agent">Agent written RTL</span>
+        <h3>Quadrature encoder decoder</h3>
+        <p>Rotary encoder input through a two flop synchronizer, 8 bit position count, sticky error on illegal jumps. The latency is part of the contract.</p>
+        <div class="badges" id="quad-badges"></div>
+        <table id="quad-table">
+          <tr><td>Status</td><td>running now</td></tr>
+        </table>
+        <div class="links" id="quad-links"><a href="https://github.com/Joonsense/chip-order/tree/main/examples/quadrature">Spec and model</a></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="order" aria-labelledby="order-h">
+    <h2 id="order-h">Order a design.</h2>
+    <p class="sub">Orders are GitHub issues, so the spec, the model, every agent attempt and the final report stay public and linkable. Need it private? Say so in the issue and we will move to a private repository.</p>
+    <div class="offer">
+      <div class="box dark">
+        <h3>Pilot</h3>
+        <div class="price">Free</div>
+        <p class="small">First 10 orders. You pay Tiny Tapeout directly only if you fabricate.</p>
+        <ul>
+          <li>RTL written and verified against your model</li>
+          <li>A Tiny Tapeout repository with green gds, precheck and gate level runs</li>
+          <li>Verification report: cycles, mutants, area, timing, every attempt</li>
+          <li>Apache 2.0, the repository is yours</li>
+        </ul>
+        <a class="btn" href="https://github.com/Joonsense/chip-order/issues/new?template=order.yml">Open an order</a>
+      </div>
+      <div class="box">
+        <h3>What makes a good order</h3>
+        <ol>
+          <li>Fits Tiny Tapeout I/O: 8 inputs, 8 outputs, 8 bidirectional pins, one clock.</li>
+          <li>Digital and synchronous. No analog, no RAM macros, no second clock domain.</li>
+          <li>Fits a few tiles: think counters, controllers, protocol engines, small DSP and ML datapaths.</li>
+          <li>A model that runs in the box above without errors, with a stimulus that exercises your protocol.</li>
+        </ol>
+        <p class="small" style="margin-top:16px">Not sure it fits? Open the order anyway. A failed order costs you nothing and the report says exactly where it stopped.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <div class="faq">
+      <details><summary>Is this a real chip?</summary><p>It is a design that passes the same layout and checks Tiny Tapeout requires for a shuttle. It becomes silicon when you submit the repository and buy a tile at app.tinytapeout.com. None of the example designs has been fabricated yet, and we say so in every report.</p></details>
+      <details><summary>Why a Python model instead of just a spec?</summary><p>Because English leaves the timing open. "Outputs the count" does not say which clock. A cycle-level model does, and it turns into a test the agent cannot argue with.</p></details>
+      <details><summary>What if the agent can't do it?</summary><p>You get the report anyway: each attempt, the stage it failed at, and the first mismatching clock. Often that points at the model, not the RTL.</p></details>
+      <details><summary>Which agent?</summary><p>Claude, run as a tool-less code generator. It only produces Verilog text. Simulation, synthesis, mutation testing and layout are done by Icarus, Verilator, Yosys, OpenSTA and the Tiny Tapeout LibreLane flow.</p></details>
+      <details><summary>Can I bring my own Verilog?</summary><p>Yes. Attach it to the order and it goes through the same checks without the agent. That alone is a useful second opinion before a shuttle deadline.</p></details>
+      <details><summary>Who is behind this?</summary><p>Kai Kim (<a href="https://x.com/KaiKimLabs">@KaiKimLabs</a>). The same flow designed an 8 MAC per clock accelerator and a digit classifier in one tile. Write up: <a href="https://kaikimlabs.com/research/experiments/ai-agent-chip-design-on-free-tiny-tapeout-flow/">kaikimlabs.com</a>.</p></details>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    <span>Chip Order · Kai Kim Labs · designs are Apache 2.0</span>
+    <span><a href="https://github.com/Joonsense/chip-order">Source of this page</a> · <a href="https://joonsense.github.io/tt-fit/">tt-fit</a> · <a href="https://joonsense.github.io/tt-int4-dot-accelerator/">Digit Chip</a></span>
+  </footer>
+</div>
+
+<script>
+const EXAMPLES = {
+pwm4: { name: 'pwm4', spec: `# 4 channel PWM controller
+
+Four independent 8 bit PWM outputs sharing one free running 8 bit counter.
+
+- A counter increments every clock and wraps 255 -> 0. Reset clears it and all duty registers.
+- Write a duty value: put the value on \`ui_in\`, the channel number on \`uio_in[2:1]\`, and pulse \`uio_in[0]\` (WE) high for one clock.
+  The new duty takes effect from the next clock.
+- \`uo_out[ch]\` is high while \`counter < duty[ch]\`, so duty 0 is always low and duty 255 is high 255 of 256 clocks.
+- \`uo_out[7:4]\` are 0. All \`uio\` pins are inputs (\`uio_oe\` = 0).
+`, model: `"""Cycle-level reference model: 4 channel PWM controller."""
+CYCLES = 3000
+
+
+class Model:
+    def reset(self):
+        self.counter = 0
+        self.duty = [0, 0, 0, 0]
+
+    def cycle(self, ui_in, uio_in):
+        out = sum(1 << ch for ch in range(4) if self.counter < self.duty[ch])
+        if uio_in & 1:
+            self.duty[(uio_in >> 1) & 3] = ui_in
+        self.counter = (self.counter + 1) & 0xFF
+        return out, 0, 0
+
+
+def stimulus(rng, cycles):
+    for i in range(cycles):
+        write = rng.random() < 0.05
+        ui = rng.choice([0, 1, 254, 255, rng.randrange(256)])
+        uio = (rng.randrange(4) << 1) | int(write) | (rng.randrange(32) << 3)
+        reset = 0 if i == cycles // 2 else 1   # one reset in the middle of the run
+        yield ui, uio, reset
+` },
+quadrature: { name: 'quadrature', spec: `# Quadrature encoder decoder
+
+Reads a rotary encoder (channels A and B) and keeps an 8 bit position count.
+
+- Inputs \`ui_in[0]\` = A, \`ui_in[1]\` = B are asynchronous, so each passes through a two flop synchronizer before use.
+- The decoder compares the synchronized state with the state it saw one clock earlier. With state = (B << 1) | A, the forward
+  Gray sequence is 0 -> 1 -> 3 -> 2 -> 0. One step forward adds 1 to the count, one step backward subtracts 1 (8 bit wrap).
+  No change does nothing. A jump of two steps (both channels changed at once) is illegal: the count is unchanged and the
+  sticky error flag is set.
+- \`uio_in[0]\` = CLEAR: while high at a rising edge, count and error flag are cleared (this takes priority over counting).
+- \`uo_out\` = count. \`uio_out[7]\` = error flag, the only \`uio\` output (\`uio_oe\` = 0x80).
+- Reset clears the synchronizers, the previous state, count and error flag.
+`, model: `"""Cycle-level reference model: quadrature decoder with a two flop synchronizer."""
+CYCLES = 4000
+ORDER = [0, 1, 3, 2]   # forward Gray sequence of (B << 1) | A
+
+
+class Model:
+    def reset(self):
+        self.sync1 = self.sync2 = self.prev = 0
+        self.count = 0
+        self.error = 0
+
+    def cycle(self, ui_in, uio_in):
+        outputs = (self.count, self.error << 7, 0x80)
+        step = (ORDER.index(self.sync2) - ORDER.index(self.prev)) % 4
+        if uio_in & 1:
+            self.count, self.error = 0, 0
+        elif step == 1:
+            self.count = (self.count + 1) & 0xFF
+        elif step == 3:
+            self.count = (self.count - 1) & 0xFF
+        elif step == 2:
+            self.error = 1
+        self.prev, self.sync2, self.sync1 = self.sync2, self.sync1, ui_in & 3
+        return outputs
+
+
+def stimulus(rng, cycles):
+    position, hold = 0, 0
+    for i in range(cycles):
+        if hold == 0:
+            r = rng.random()
+            if r < 0.02:
+                position = (position + 2) % 4          # illegal jump
+            elif r < 0.6:
+                position = (position + rng.choice([1, 1, 1, -1])) % 4
+            hold = rng.choice([1, 1, 2, 3, 5])
+        hold -= 1
+        clear = 1 if rng.random() < 0.01 else 0
+        reset = 0 if i == cycles // 2 else 1
+        yield ORDER[position] | (rng.randrange(64) << 2), clear | (rng.randrange(128) << 1), reset
+` },
+blank: { name: 'counter', spec: `# 8 bit counter with enable and load
+
+- \`ui_in\` is a load value, \`uio_in[0]\` = LOAD, \`uio_in[1]\` = ENABLE.
+- On a rising edge: LOAD copies \`ui_in\` into the counter, otherwise ENABLE adds 1 (wraps at 255).
+- \`uo_out\` = counter. All \`uio\` pins are inputs.
+`, model: `"""Cycle-level reference model: 8 bit counter with load and enable."""
+
+
+class Model:
+    def reset(self):
+        self.count = 0
+
+    def cycle(self, ui_in, uio_in):
+        out = self.count                      # what the pins show this clock
+        if uio_in & 1:                        # LOAD
+            self.count = ui_in
+        elif uio_in & 2:                      # ENABLE
+            self.count = (self.count + 1) & 0xFF
+        return out, 0, 0                      # uo_out, uio_out, uio_oe
+
+
+def stimulus(rng, cycles):
+    for _ in range(cycles):
+        load = rng.random() < 0.03
+        enable = rng.random() < 0.8
+        yield rng.randrange(256), int(load) | int(enable) << 1
+` } };
+
+const RUNNER = `
+import random, types, json, traceback
+def __run(src, cycles, seed):
+    mod = types.ModuleType("model")
+    try:
+        exec(compile(src, "model.py", "exec"), mod.__dict__)
+    except Exception:
+        return json.dumps({"error": traceback.format_exc(limit=2)})
+    if not hasattr(mod, "Model"):
+        return json.dumps({"error": "model.py needs a class Model with reset() and cycle(ui_in, uio_in)."})
+    rng = random.Random(seed)
+    m = mod.Model(); m.reset()
+    stim = getattr(mod, "stimulus", None)
+    rows = []
+    try:
+        it = stim(rng, cycles) if stim else ((rng.randrange(256), rng.randrange(256)) for _ in range(cycles))
+        for i, item in enumerate(it):
+            if i >= cycles: break
+            ui, uio = item[0] & 255, item[1] & 255
+            rst = item[2] if len(item) > 2 else 1
+            if not rst:
+                m.reset(); rows.append([ui, uio, 0, None, None, None]); continue
+            out = m.cycle(ui, uio)
+            if not (isinstance(out, (tuple, list)) and len(out) == 3 and all(isinstance(v, int) and 0 <= v < 256 for v in out)):
+                return json.dumps({"rows": rows, "error": f"cycle {i}: Model.cycle must return three ints 0..255 (uo_out, uio_out, uio_oe), got {out!r}"})
+            rows.append([ui, uio, 1, out[0], out[1] & out[2], out[2]])
+    except Exception:
+        return json.dumps({"rows": rows, "error": traceback.format_exc(limit=3)})
+    return json.dumps({"rows": rows, "custom": stim is not None})
+`;
+
+const $ = (id) => document.getElementById(id);
+const ed = $('ed'), msg = $('msg'), wave = $('wave'), scroll = $('scroll'), err = $('err'), orderBtn = $('orderit');
+const state = { files: { model: '', spec: '' }, tab: 'model', rows: null, start: 0, view: 96, name: 'pwm4' };
+let pyodide = null;
+
+function load(key) {
+  const ex = EXAMPLES[key];
+  state.files = { model: ex.model, spec: ex.spec };
+  state.name = ex.name;
+  ed.value = state.files[state.tab];
+  state.rows = null; orderBtn.disabled = true; orderBtn.title = 'Run the model first';
+  err.style.display = 'none';
+  msg.className = 'runmsg'; msg.textContent = pyodide ? 'Ready. Press Run model.' : 'Python loads on the first run (about 7 MB, once).';
+  drawEmpty();
+}
+function setTab(tab) {
+  state.files[state.tab] = ed.value;
+  state.tab = tab;
+  $('tab-model').setAttribute('aria-selected', tab === 'model');
+  $('tab-spec').setAttribute('aria-selected', tab === 'spec');
+  ed.value = state.files[tab];
+}
+$('tab-model').onclick = () => setTab('model');
+$('tab-spec').onclick = () => setTab('spec');
+$('example').onchange = (e) => load(e.target.value);
+ed.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+    e.preventDefault();
+    const s = ed.selectionStart, t = ed.selectionEnd;
+    ed.setRangeText('    ', s, t, 'end');
+  }
+});
+ed.addEventListener('input', () => { if (state.tab === 'model' && state.rows) { orderBtn.disabled = true; orderBtn.title = 'Run the changed model first'; } });
+
+async function ensurePython() {
+  if (pyodide) return pyodide;
+  msg.className = 'runmsg'; msg.textContent = 'Loading Python in your browser…';
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+    s.onload = resolve; s.onerror = () => reject(new Error('Could not load Pyodide from cdn.jsdelivr.net'));
+    document.head.appendChild(s);
+  });
+  pyodide = await loadPyodide();
+  pyodide.runPython(RUNNER);
+  return pyodide;
+}
+
+$('run').onclick = async () => {
+  state.files[state.tab] = ed.value;
+  const btn = $('run');
+  btn.disabled = true; err.style.display = 'none';
+  try {
+    const py = await ensurePython();
+    const cycles = Math.max(16, Math.min(20000, parseInt($('cycles').value, 10) || 512));
+    msg.className = 'runmsg'; msg.textContent = `Running ${cycles.toLocaleString()} cycles…`;
+    await new Promise(r => setTimeout(r, 20));
+    const t0 = performance.now();
+    py.globals.set('__src', state.files.model);
+    const out = JSON.parse(py.runPython(`__run(__src, ${cycles}, 42)`));
+    const ms = Math.round(performance.now() - t0);
+    state.rows = out.rows || [];
+    state.start = 0;
+    if (out.error) {
+      err.textContent = out.error.trim(); err.style.display = 'block';
+      msg.className = 'runmsg err'; msg.textContent = state.rows.length ? `Stopped at cycle ${state.rows.length}.` : 'The model did not run.';
+      orderBtn.disabled = true; orderBtn.title = 'Fix the model first';
+    } else {
+      const resets = state.rows.filter(r => !r[2]).length;
+      msg.className = 'runmsg ok';
+      msg.textContent = `${state.rows.length.toLocaleString()} cycles in ${ms} ms, contract holds${resets ? `, ${resets} reset cycle${resets > 1 ? 's' : ''}` : ''}${out.custom ? '' : ' (random inputs: add stimulus() for your protocol)'}.`;
+      orderBtn.disabled = false; orderBtn.title = '';
+    }
+    setupScroll(); draw();
+  } catch (e) {
+    msg.className = 'runmsg err'; msg.textContent = e.message;
+  } finally { btn.disabled = false; }
+};
+
+function setupScroll() {
+  const n = state.rows ? state.rows.length : 0;
+  state.view = Math.min(parseInt($('zoom').value, 10), Math.max(16, n));
+  state.start = Math.min(state.start, Math.max(0, n - state.view));
+  scroll.max = Math.max(0, n - state.view);
+  scroll.value = state.start;
+  $('win').textContent = `${state.view} of ${n.toLocaleString()} shown`;
+}
+scroll.oninput = () => { state.start = parseInt(scroll.value, 10); draw(); };
+$('zoom').onchange = () => { if (state.rows) { setupScroll(); draw(); } };
+
+function drawEmpty() {
+  wave.innerHTML = '<div class="empty">The waveform shows up here: inputs you drove, outputs your model says the chip must produce.</div>';
+  $('pos').textContent = '0'; $('win').textContent = '96 shown'; scroll.max = 0;
+}
+
+function lanes(rows) {
+  const L = [{ label: 'rst_n', kind: 'bit', get: r => r[2], color: '#e0a84a' },
+             { label: 'ui_in', kind: 'bus', get: r => r[0], color: '#8eabff' },
+             { label: 'uio_in', kind: 'bus', get: r => r[1], color: '#8eabff' }];
+  const outs = rows.filter(r => r[2]);
+  const bitsUsed = [];
+  for (let b = 0; b < 8; b++) if (outs.some(r => (r[3] >> b) & 1)) bitsUsed.push(b);
+  if (bitsUsed.length && bitsUsed.length <= 4) {
+    for (const b of bitsUsed) L.push({ label: `uo_out[${b}]`, kind: 'bit', get: r => r[2] ? (r[3] >> b) & 1 : null, color: '#4cc283' });
+  } else {
+    L.push({ label: 'uo_out', kind: 'bus', get: r => r[2] ? r[3] : null, color: '#4cc283' });
+  }
+  if (outs.some(r => r[5])) {
+    L.push({ label: 'uio_out', kind: 'bus', get: r => r[2] ? r[4] : null, color: '#4cc283' });
+    L.push({ label: 'uio_oe', kind: 'bus', get: r => r[2] ? r[5] : null, color: '#c47ddb' });
+  }
+  return L;
+}
+
+function draw() {
+  const rows = state.rows;
+  if (!rows || !rows.length) { drawEmpty(); return; }
+  const slice = rows.slice(state.start, state.start + state.view);
+  const L = lanes(rows);
+  const W = Math.max(320, wave.clientWidth - 6), labelW = 84, laneH = 34, top = 22;
+  const cw = (W - labelW - 8) / slice.length;
+  const H = top + L.length * laneH + 6;
+  const hex = v => v.toString(16).padStart(2, '0');
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Waveform of ${L.length} signals over cycles ${state.start} to ${state.start + slice.length - 1}">`;
+  // cycle ruler
+  const every = cw > 18 ? 8 : cw > 8 ? 16 : 32;
+  for (let i = 0; i < slice.length; i++) {
+    const c = state.start + i, x = labelW + i * cw;
+    if (c % every === 0) {
+      s += `<line x1="${x}" y1="${top - 6}" x2="${x}" y2="${H}" stroke="#262b33" stroke-width="1"/>`;
+      s += `<text x="${x + 3}" y="${top - 9}" fill="#6b7480" font-size="10" font-family="JetBrains Mono, monospace">${c}</text>`;
+    }
+    if (!slice[i][2]) s += `<rect x="${x}" y="${top}" width="${cw}" height="${H - top}" fill="rgba(224,168,74,.08)"/>`;
+  }
+  L.forEach((lane, li) => {
+    const y0 = top + li * laneH, yh = y0 + 7, yl = y0 + laneH - 9, ym = (yh + yl) / 2;
+    s += `<text x="4" y="${ym + 4}" fill="#aab3bf" font-size="11.5" font-family="JetBrains Mono, monospace">${lane.label}</text>`;
+    if (lane.kind === 'bit') {
+      let d = '', prev = null;
+      slice.forEach((r, i) => {
+        const v = lane.get(r), x = labelW + i * cw;
+        if (v === null) { prev = null; s += `<rect x="${x}" y="${yh}" width="${cw}" height="${yl - yh}" fill="url(#hatch)"/>`; return; }
+        const y = v ? yh : yl;
+        d += prev === null ? `M${x},${y}` : (prev !== v ? `L${x},${prev ? yh : yl}L${x},${y}` : '');
+        d += `L${x + cw},${y}`;
+        prev = v;
+      });
+      s += `<path d="${d}" fill="none" stroke="${lane.color}" stroke-width="1.6" stroke-linejoin="round"/>`;
+    } else {
+      let i = 0;
+      while (i < slice.length) {
+        const v = lane.get(slice[i]);
+        let j = i + 1;
+        while (j < slice.length && lane.get(slice[j]) === v) j++;
+        const x1 = labelW + i * cw, x2 = labelW + j * cw, k = Math.min(3, (x2 - x1) / 3);
+        if (v === null) {
+          s += `<rect x="${x1}" y="${yh}" width="${x2 - x1}" height="${yl - yh}" fill="url(#hatch)"/>`;
+        } else {
+          s += `<path d="M${x1},${ym}L${x1 + k},${yh}L${x2 - k},${yh}L${x2},${ym}L${x2 - k},${yl}L${x1 + k},${yl}Z" fill="rgba(255,255,255,.03)" stroke="${lane.color}" stroke-width="1.3"/>`;
+          if (x2 - x1 > 22) s += `<text x="${(x1 + x2) / 2}" y="${ym + 4}" text-anchor="middle" fill="#e8ecf1" font-size="10.5" font-family="JetBrains Mono, monospace">${hex(v)}</text>`;
+        }
+        i = j;
+      }
+    }
+  });
+  s += `<defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="#3a414b" stroke-width="1.2"/></pattern></defs></svg>`;
+  wave.innerHTML = s;
+  $('pos').textContent = state.start.toLocaleString();
+}
+window.addEventListener('resize', () => { if (state.rows) draw(); });
+
+orderBtn.onclick = () => {
+  state.files[state.tab] = ed.value;
+  const params = new URLSearchParams({ template: 'order.yml', title: `Order: ${state.name}`, name: state.name,
+                                       spec: state.files.spec, model: state.files.model });
+  let url = `https://github.com/Joonsense/chip-order/issues/new?${params}`;
+  if (url.length > 7800) {
+    navigator.clipboard && navigator.clipboard.writeText(state.files.model);
+    url = `https://github.com/Joonsense/chip-order/issues/new?${new URLSearchParams({ template: 'order.yml', title: `Order: ${state.name}`, name: state.name, spec: state.files.spec })}`;
+    msg.className = 'runmsg'; msg.textContent = 'Model is long, so it was copied to your clipboard: paste it into the model field.';
+  }
+  window.open(url, '_blank', 'noopener');
+};
+
+// replay the real order on the card
+(function replay() {
+  const items = [...document.querySelectorAll('#stages .stage')];
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { items.forEach(i => i.classList.add('done')); return; }
+  let i = 0;
+  const step = () => {
+    if (i > 0) { items[i - 1].classList.remove('run'); items[i - 1].classList.add('done'); }
+    if (i < items.length) { items[i].classList.add('run'); i++; setTimeout(step, i === items.length ? 1300 : 650); }
+  };
+  const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); setTimeout(step, 300); } });
+  io.observe($('card'));
+})();
+
+// quadrature status is filled from the repo once the agent order lands
+fetch('quadrature.json').then(r => r.ok ? r.json() : null).then(q => {
+  if (!q) return;
+  $('quad-table').innerHTML = q.rows.map(([k, v]) => `<tr><td>${k}</td><td class="num">${v}</td></tr>`).join('');
+  if (q.repo) {
+    $('quad-badges').innerHTML = ['gds', 'test'].map(w => `<img alt="${w}" src="https://github.com/${q.repo}/actions/workflows/${w}.yaml/badge.svg">`).join('');
+    $('quad-links').innerHTML = `<a href="https://github.com/${q.repo}">Repository</a><a href="https://github.com/${q.repo}/blob/main/REPORT.md">Report with every attempt</a><a href="https://joonsense.github.io/${q.repo.split('/')[1]}/">3D layout</a>`;
+  }
+}).catch(() => {});
+
+load('pwm4');
+</script>
+</body>
+</html>
