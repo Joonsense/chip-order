@@ -1,0 +1,6 @@
+{"repo": "Joonsense/tt-order-quadrature",
+ "rows": [["Agent attempts", "1 (53 s, spec to verdict)"],
+          ["Cycles matched", "11,997 RTL · 11,997 gates"],
+          ["Mutants caught", "8 / 8"],
+          ["Layout", "1x1 · 8.9% · DRC 0 · LVS 0"],
+          ["Setup slack, slow corner", "+14.14 ns at 50 MHz"]]}

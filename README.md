@@ -34,6 +34,6 @@ def stimulus(rng, cycles):               # optional: drive your protocol instead
 | Order | RTL | Repository |
 |---|---|---|
 | 4 channel PWM | hand written, verified by the flow | [tt-order-pwm4](https://github.com/Joonsense/tt-order-pwm4) |
-| Quadrature encoder decoder | agent | see [examples/quadrature](examples/quadrature) |
+| Quadrature encoder decoder | agent, first attempt, 53 s | [tt-order-quadrature](https://github.com/Joonsense/tt-order-quadrature) |
 
 Page source: `index.html` (static, Pyodide runs the model in the browser). Apache 2.0.

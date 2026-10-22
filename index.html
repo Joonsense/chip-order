@@ -255,7 +255,7 @@ a duty value...</pre></div>
   </div>
 
   <div class="proof" aria-label="Track record">
-    <div><b class="num">8</b><span>designs through the official Tiny Tapeout flow, all DRC 0 and LVS 0</span></div>
+    <div><b class="num">10</b><span>designs through the official Tiny Tapeout flow, all DRC 0 and LVS 0</span></div>
     <div><b class="num">80</b><span>multiply accumulates per clock in the largest one, a digit classifier</span></div>
     <div><b class="num">~10 s</b><span>from Verilog to a full verdict on a laptop, before any layout run</span></div>
     <div><b class="num">€70</b><span>per 1x1 tile, paid to Tiny Tapeout if you fabricate. Our part is free in the pilot</span></div>
@@ -328,12 +328,12 @@ a duty value...</pre></div>
         <div class="links"><a href="https://github.com/Joonsense/tt-order-pwm4">Repository</a><a href="https://github.com/Joonsense/tt-order-pwm4/blob/main/REPORT.md">Report</a><a href="https://joonsense.github.io/tt-order-pwm4/">3D layout</a></div>
       </article>
       <article class="exc" id="ex-quad">
-        <span class="who agent">Agent written RTL</span>
+        <span class="who agent">Agent written RTL · first attempt</span>
         <h3>Quadrature encoder decoder</h3>
         <p>Rotary encoder input through a two flop synchronizer, 8 bit position count, sticky error on illegal jumps. The latency is part of the contract.</p>
         <div class="badges" id="quad-badges"></div>
         <table id="quad-table">
-          <tr><td>Status</td><td>running now</td></tr>
+          <tr><td>Agent attempts</td><td class="num">1 (53 s, spec to verdict)</td></tr>
         </table>
         <div class="links" id="quad-links"><a href="https://github.com/Joonsense/chip-order/tree/main/examples/quadrature">Spec and model</a></div>
       </article>
