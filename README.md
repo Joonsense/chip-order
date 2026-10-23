@@ -15,7 +15,8 @@ It is delivered only after it
 ## Order
 
 [Open an order issue](https://github.com/Joonsense/chip-order/issues/new?template=order.yml), or run your model on the
-[page](https://joonsense.github.io/chip-order/#try) and press *Order this design*. Pilot: the first 10 orders are free.
+[page](https://joonsense.github.io/chip-order/#try) and press *Order this design*. A bot checks the model within minutes
+(and your own Verilog against it, if attached). Pilot: the first 10 orders are free.
 
 ## Model contract
 
@@ -33,6 +34,7 @@ def stimulus(rng, cycles):               # optional: drive your protocol instead
 
 | Order | RTL | Repository |
 |---|---|---|
+| tiny8, 8 bit accumulator CPU ([order #1](https://github.com/Joonsense/chip-order/issues/1)) | agent, first attempt, 104 s | [tt-order-1-tiny8](https://github.com/Joonsense/tt-order-1-tiny8) |
 | 4 channel PWM | hand written, verified by the flow | [tt-order-pwm4](https://github.com/Joonsense/tt-order-pwm4) |
 | Quadrature encoder decoder | agent, first attempt, 53 s | [tt-order-quadrature](https://github.com/Joonsense/tt-order-quadrature) |
 

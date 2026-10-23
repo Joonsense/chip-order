@@ -141,7 +141,8 @@ select, .lab input[type=number] { font: 13px "Schibsted Grotesk", sans-serif; ba
 .step .catches b { color: var(--poly); font-weight: 700; }
 
 /* examples */
-.ex { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ex { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 1100px) { .ex { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .exc { background: var(--sheet); border: 1px solid var(--rule); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
 .exc h3 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
 .exc .who { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
@@ -231,32 +232,32 @@ footer a { color: var(--ink-2); }
     </div>
 
     <div class="card" id="card" aria-label="A real order, replayed">
-      <div class="card-head"><b>Order: 4 channel PWM</b><span class="mono">tt_um_joonsense_pwm4</span></div>
+      <div class="card-head"><b>Order #1: tiny8 CPU</b><span class="mono">agent · 1 attempt · 104 s</span></div>
       <div class="files" aria-hidden="true">
-        <div class="file"><div class="name"><span>spec.md</span><span>you</span></div><pre>Four 8 bit PWM outputs
-sharing one free running
-counter. Pulse WE to load
-a duty value...</pre></div>
-        <div class="file"><div class="name"><span>model.py</span><span>you</span></div><pre><span class="k">def</span> cycle(self, ui, uio):
-  out = sum(<span class="n">1</span> &lt;&lt; ch <span class="k">for</span> ch
-    <span class="k">in</span> range(<span class="n">4</span>) <span class="k">if</span>
-    self.counter &lt; self.duty[ch])</pre></div>
+        <div class="file"><div class="name"><span>spec.md</span><span>customer</span></div><pre>8 bit accumulator CPU,
+16 bytes of memory, 16
+instructions, programs
+loaded over the pins...</pre></div>
+        <div class="file"><div class="name"><span>model.py</span><span>customer</span></div><pre><span class="k">elif</span> op == <span class="n">4</span>:
+  self.acc = (self.acc
+    + m) &amp; <span class="n">0xFF</span>
+<span class="k">elif</span> op == <span class="n">11</span>: nxt = a</pre></div>
       </div>
       <ol class="stages" id="stages">
-        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Verilator lint <small>-Wall, errors block delivery</small></span><span class="val">0 warnings</span></li>
-        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">RTL vs your model <small>every clock, 3 seeds, reset mid run</small></span><span class="val num">8,997 / 8,997</span></li>
-        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Synthesized netlist vs model <small>Yosys gates, same test</small></span><span class="val num">8,997 / 8,997</span></li>
-        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Mutation test <small>broken copies of the RTL must fail</small></span><span class="val num">5 / 5 caught</span></li>
-        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">sky130 fit <small>calibrated on 11 real layouts</small></span><span class="val num">1x1 tile</span></li>
-        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Tiny Tapeout gds · precheck · gate level <small>DRC 0 · LVS 0 · antenna 0</small></span><span class="val num">+11.33 ns @ 50 MHz</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Agent writes Verilog <small>one tt_um module, Tiny Tapeout pins</small></span><span class="val">attempt 1</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">RTL vs the model <small>every clock, 3 seeds, reset mid run</small></span><span class="val num">11,997 / 11,997</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Synthesized netlist vs model <small>Yosys gates, same test</small></span><span class="val num">11,997 / 11,997</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Mutation test <small>broken copies of the RTL must fail</small></span><span class="val num">8 / 8 caught</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">sky130 fit <small>calibrated on real layouts</small></span><span class="val num">1x1 tile</span></li>
+        <li class="stage"><span class="tick"><svg viewBox="0 0 10 10"><path d="M1.5 5.2 4 7.6 8.6 2.6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></span><span class="what">Tiny Tapeout gds · precheck · gate level <small>DRC 0 · LVS 0 · antenna 0</small></span><span class="val num">79.5% · +1.54 ns</span></li>
       </ol>
-      <div class="card-foot"><span class="status"><i></i>Delivered</span><a href="https://github.com/Joonsense/tt-order-pwm4">github.com/Joonsense/tt-order-pwm4</a></div>
+      <div class="card-foot"><span class="status"><i></i>Delivered</span><a href="https://github.com/Joonsense/chip-order/issues/1">See the order thread</a></div>
     </div>
   </div>
 
   <div class="proof" aria-label="Track record">
-    <div><b class="num">10</b><span>designs through the official Tiny Tapeout flow, all DRC 0 and LVS 0</span></div>
-    <div><b class="num">80</b><span>multiply accumulates per clock in the largest one, a digit classifier</span></div>
+    <div><b class="num">11</b><span>designs through the official Tiny Tapeout flow, all DRC 0 and LVS 0</span></div>
+    <div><b class="num">104 s</b><span>for the agent to turn a CPU model into Verilog that passed every check, first try</span></div>
     <div><b class="num">~10 s</b><span>from Verilog to a full verdict on a laptop, before any layout run</span></div>
     <div><b class="num">€70</b><span>per 1x1 tile, paid to Tiny Tapeout if you fabricate. Our part is free in the pilot</span></div>
   </div>
@@ -275,6 +276,7 @@ a duty value...</pre></div>
           <select id="example" aria-label="Example order">
             <option value="pwm4">4 channel PWM</option>
             <option value="quadrature">Quadrature encoder decoder</option>
+            <option value="tiny8">tiny8 CPU (order #1)</option>
             <option value="blank">Blank: 8 bit counter</option>
           </select>
         </label>
@@ -315,6 +317,20 @@ a duty value...</pre></div>
     <p class="sub">Each delivery is a public repository you can clone, re-run and submit. The badges are live GitHub Actions results, not screenshots.</p>
     <div class="ex">
       <article class="exc">
+        <span class="who agent">Agent written RTL · first attempt · public order #1</span>
+        <h3>tiny8: an 8 bit accumulator CPU</h3>
+        <p>16 bytes of shared program and data memory, 16 instructions, programs loaded over the pins. The test runs Fibonacci, a countdown, a self modifying program and random bytes as code.</p>
+        <div class="badges"><img alt="gds" src="https://github.com/Joonsense/tt-order-1-tiny8/actions/workflows/gds.yaml/badge.svg"><img alt="test" src="https://github.com/Joonsense/tt-order-1-tiny8/actions/workflows/test.yaml/badge.svg"></div>
+        <table>
+          <tr><td>Agent attempts</td><td class="num">1 (104 s, spec to verdict)</td></tr>
+          <tr><td>Cycles matched</td><td class="num">11,997 RTL · 11,997 gates</td></tr>
+          <tr><td>Mutants caught</td><td class="num">8 / 8</td></tr>
+          <tr><td>Layout</td><td class="num">1x1 · 79.5% · DRC 0 · LVS 0</td></tr>
+          <tr><td>Setup slack, slow corner</td><td class="num">+1.54 ns at 50 MHz</td></tr>
+        </table>
+        <div class="links"><a href="https://github.com/Joonsense/chip-order/issues/1">Order thread</a><a href="https://github.com/Joonsense/tt-order-1-tiny8">Repository</a><a href="https://joonsense.github.io/tt-order-1-tiny8/">3D layout</a></div>
+      </article>
+      <article class="exc">
         <span class="who hand">Hand written RTL, verified by the flow</span>
         <h3>4 channel PWM controller</h3>
         <p>Four 8 bit PWM outputs on a shared counter, duty registers loaded over the bidirectional pins.</p>
@@ -342,7 +358,7 @@ a duty value...</pre></div>
 
   <section id="order" aria-labelledby="order-h">
     <h2 id="order-h">Order a design.</h2>
-    <p class="sub">Orders are GitHub issues, so the spec, the model, every agent attempt and the final report stay public and linkable. Need it private? Say so in the issue and we will move to a private repository.</p>
+    <p class="sub">Orders are GitHub issues, so the spec, the model, every agent attempt and the final report stay public and linkable. A bot checks your model within minutes of opening the issue, and checks your own Verilog against it if you attach some. <a href="https://github.com/Joonsense/chip-order/issues?q=label%3Aorder">See the live orders</a>. Need it private? Say so in the issue.</p>
     <div class="offer">
       <div class="box dark">
         <h3>Pilot</h3>
@@ -477,6 +493,7 @@ def stimulus(rng, cycles):
         reset = 0 if i == cycles // 2 else 1
         yield ORDER[position] | (rng.randrange(64) << 2), clear | (rng.randrange(128) << 1), reset
 ` },
+tiny8: { name: "tiny8", spec: "# tiny8: an 8 bit accumulator CPU\n\nA small CPU with 16 bytes of memory shared by program and data. Programs are loaded over the pins, then run one\ninstruction per clock.\n\nPins\n- `uio_in[0]` LOAD: while high, the byte on `ui_in` is written to memory at the load pointer, and the pointer advances (wraps 15 -> 0).\n- `uio_in[1]` RUN: while high (and LOAD and RESTART low), the CPU executes one instruction per clock unless halted.\n- `uio_in[2]` RESTART: while high, PC, load pointer and the halted flag go to 0. Memory, accumulator and output keep their values.\n  Priority when several are high: RESTART, then LOAD, then RUN.\n- `uo_out` is the output register, written by OUT.\n- `uio_out[7:4]` = PC, `uio_out[3]` = halted. These five are outputs (`uio_oe` = 0xF8), `uio[2:0]` are inputs.\n\nInstructions (opcode in bits 7:4, operand k or address a in bits 3:0). Every instruction takes one clock. PC wraps at 16.\n| Op | Name | Effect |\n|---|---|---|\n| 0 | NOP | |\n| 1 | LDI k | acc = k |\n| 2 | LD a | acc = mem[a] |\n| 3 | ST a | mem[a] = acc (programs may modify themselves) |\n| 4 | ADD a | acc = acc + mem[a] (8 bit wrap) |\n| 5 | SUB a | acc = acc - mem[a] (8 bit wrap) |\n| 6 | AND a | acc = acc & mem[a] |\n| 7 | OR a | acc = acc \\| mem[a] |\n| 8 | XOR a | acc = acc ^ mem[a] |\n| 9 | SHL | acc = acc << 1 (8 bit) |\n| A | SHR | acc = acc >> 1 |\n| B | JMP a | PC = a |\n| C | JZ a | PC = a if acc == 0, else PC + 1 |\n| D | JNZ a | PC = a if acc != 0, else PC + 1 |\n| E | OUT | output register = acc |\n| F | HLT | halted = 1, PC stays |\n\nReset clears memory, accumulator, output, PC, load pointer and halted.\n", model: "\"\"\"Cycle-level reference model: tiny8 accumulator CPU.\"\"\"\nCYCLES = 4000\nFIB = [0x10, 0x3E, 0x11, 0x3F, 0x2E, 0xE0, 0x4F, 0x3D, 0x2F, 0x3E, 0x2D, 0x3F, 0xB4, 0x00, 0x00, 0x00]\nCOUNTDOWN = [0x29, 0xE0, 0x5A, 0xD1, 0xE0, 0xF0, 0x00, 0x00, 0x00, 0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00]\nCOUNTER = [0x2D, 0x4E, 0x3D, 0x2D, 0xE0, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x01, 0x00]\n# rewrites its own instruction at address 0 (LDI k) with k + 1, so the program it runs changes every pass\nSELFMOD = [0x10, 0xE0, 0x20, 0x4F, 0x30, 0xB0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01]\n\n\nclass Model:\n    def reset(self):\n        self.mem = [0] * 16\n        self.acc = self.out = self.pc = self.ptr = self.halted = 0\n\n    def cycle(self, ui_in, uio_in):\n        outputs = (self.out, (self.pc << 4) | (self.halted << 3), 0xF8)\n        if uio_in & 4:\n            self.pc = self.ptr = self.halted = 0\n        elif uio_in & 1:\n            self.mem[self.ptr] = ui_in\n            self.ptr = (self.ptr + 1) & 15\n        elif uio_in & 2 and not self.halted:\n            self.execute()\n        return outputs\n\n    def execute(self):\n        ins = self.mem[self.pc]\n        op, a = ins >> 4, ins & 15\n        nxt = (self.pc + 1) & 15\n        m = self.mem[a]\n        if op == 1: self.acc = a\n        elif op == 2: self.acc = m\n        elif op == 3: self.mem[a] = self.acc\n        elif op == 4: self.acc = (self.acc + m) & 0xFF\n        elif op == 5: self.acc = (self.acc - m) & 0xFF\n        elif op == 6: self.acc &= m\n        elif op == 7: self.acc |= m\n        elif op == 8: self.acc ^= m\n        elif op == 9: self.acc = (self.acc << 1) & 0xFF\n        elif op == 10: self.acc >>= 1\n        elif op == 11: nxt = a\n        elif op == 12 and self.acc == 0: nxt = a\n        elif op == 13 and self.acc != 0: nxt = a\n        elif op == 14: self.out = self.acc\n        elif op == 15:\n            self.halted = 1\n            nxt = self.pc\n        self.pc = nxt\n\n\ndef stimulus(rng, cycles):\n    \"\"\"Load a program (three real ones or random bytes), run it with pauses, sometimes restart mid run.\"\"\"\n    i = 0\n    while i < cycles:\n        program = rng.choice([FIB, COUNTDOWN, COUNTER, SELFMOD, [rng.randrange(256) for _ in range(16)]])\n        yield 0, 4                                    # RESTART: pointer and PC to 0\n        i += 1\n        for byte in program:\n            yield byte, 1 | (rng.randrange(32) << 3)  # LOAD, upper uio bits are noise\n            i += 1\n        for _ in range(rng.randrange(40, 200)):\n            if i >= cycles:\n                return\n            r = rng.random()\n            uio = 2 if r < 0.85 else (0 if r < 0.97 else 6)   # run, pause, or RUN with RESTART (restart wins)\n            yield rng.randrange(256), uio | (rng.randrange(32) << 3), 0 if i == cycles // 2 else 1\n            i += 1\n" },
 blank: { name: 'counter', spec: `# 8 bit counter with enable and load
 
 - \`ui_in\` is a load value, \`uio_in[0]\` = LOAD, \`uio_in[1]\` = ENABLE.

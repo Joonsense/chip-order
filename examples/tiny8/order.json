@@ -1,0 +1,14 @@
+{
+  "name": "tiny8",
+  "title": "tiny8: 8 bit accumulator CPU",
+  "description": "8-bit accumulator CPU, 16 byte memory, 16 instructions, programs loaded over the pins (chip-lab order flow)",
+  "tiles": "1x2",
+  "pinout": {
+    "ui[0]": "DATA0", "ui[1]": "DATA1", "ui[2]": "DATA2", "ui[3]": "DATA3",
+    "ui[4]": "DATA4", "ui[5]": "DATA5", "ui[6]": "DATA6", "ui[7]": "DATA7",
+    "uo[0]": "OUT0", "uo[1]": "OUT1", "uo[2]": "OUT2", "uo[3]": "OUT3",
+    "uo[4]": "OUT4", "uo[5]": "OUT5", "uo[6]": "OUT6", "uo[7]": "OUT7",
+    "uio[0]": "LOAD", "uio[1]": "RUN", "uio[2]": "RESTART", "uio[3]": "HALTED",
+    "uio[4]": "PC0", "uio[5]": "PC1", "uio[6]": "PC2", "uio[7]": "PC3"
+  }
+}
