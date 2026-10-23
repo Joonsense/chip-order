@@ -32,11 +32,11 @@ jobs:
           sudo apt-get install -y -qq --no-install-recommends iverilog verilator yosys yosys-dev > /dev/null
           python3 -m pip install --quiet --break-system-packages cocotb==2.1.0
       - name: Check the order
-        run: python3 tools/check_order.py "$GITHUB_EVENT_PATH" result.md
+        run: python3 tools/check_order.py "$GITHUB_EVENT_PATH" result.json
       - uses: actions/upload-artifact@v4
         with:
           name: result
-          path: result.md
+          path: result.json
           retention-days: 3
 
   comment:
@@ -45,15 +45,22 @@ jobs:
     permissions:
       issues: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: tools
       - uses: actions/download-artifact@v4
         with:
           name: result
+          path: untrusted
       - name: Post
+
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          # neutralise @mentions and cap the size before posting untrusted text
-          sed 's/@/@\xe2\x80\x8b/g' result.md | head -c 60000 > body.md
+          # render the untrusted JSON with the trusted renderer from main, then neutralise @mentions
+          python3 tools/check_order.py --render untrusted/result.json comment.md
+          sed 's/@/@\xe2\x80\x8b/g' comment.md | head -c 60000 > body.md
           gh issue comment "$ISSUE" -R "$REPO" --body-file body.md
