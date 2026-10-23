@@ -214,6 +214,7 @@ footer a { color: var(--ink-2); }
       <a href="#try" class="keep">Try it</a>
       <a href="#how">How it works</a>
       <a href="#examples">Examples</a>
+      <a href="#tools">Free tools</a>
       <a href="#order" class="keep">Order</a>
     </nav>
   </header>
@@ -353,6 +354,29 @@ loaded over the pins...</pre></div>
         </table>
         <div class="links" id="quad-links"><a href="https://github.com/Joonsense/chip-order/tree/main/examples/quadrature">Spec and model</a></div>
       </article>
+    </div>
+  </section>
+
+  <section id="tools" aria-labelledby="tools-h">
+    <h2 id="tools-h">Free tools for your own Tiny Tapeout repo.</h2>
+    <p class="sub">The same checks the order flow runs, as GitHub Actions you can add to any repository made from the Tiny Tapeout template.</p>
+    <div class="offer">
+      <div class="box">
+        <h3>tt-mutate</h3>
+        <p class="small" style="margin:0 0 10px">Does your test catch bugs?</p>
+        <p style="margin:0;color:var(--ink-2)">Injects one bug at a time into your design (flipped operator, inverted condition, wrong constant) and runs your own cocotb test on each. Reports which bugs survived and on which line.</p>
+        <pre class="mono" style="background:var(--code-bg);color:#d6dde6;border-radius:10px;padding:12px 14px;font-size:13px;overflow:auto;margin:16px 0 0">- uses: Joonsense/tt-mutate@v1
+  with:
+    min-score: 0.6</pre>
+        <a class="btn ghost" href="https://github.com/Joonsense/tt-mutate">github.com/Joonsense/tt-mutate</a>
+      </div>
+      <div class="box">
+        <h3>tt-fit</h3>
+        <p class="small" style="margin:0 0 10px">Will it fit its tiles and meet 50 MHz?</p>
+        <p style="margin:0;color:var(--ink-2)">Predicts placement utilization and slow corner timing in seconds, before the 10 minute hardening run, from a model calibrated on 436 real shuttle projects. Also runs in your browser.</p>
+        <pre class="mono" style="background:var(--code-bg);color:#d6dde6;border-radius:10px;padding:12px 14px;font-size:13px;overflow:auto;margin:16px 0 0">- uses: Joonsense/tt-fit@v2</pre>
+        <a class="btn ghost" href="https://joonsense.github.io/tt-fit/">Try tt-fit in the browser</a>
+      </div>
     </div>
   </section>
 
