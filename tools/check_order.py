@@ -198,5 +198,13 @@ def main(event_path: str, report_path: str) -> int:
     return 0
 
 
+def needs_tools(event_path: str) -> bool:
+    body = json.loads(Path(event_path).read_text()).get('issue', {}).get('body', '')
+    return bool(parse(body).get('rtl', '').strip())
+
+
 if __name__ == '__main__':
+    if sys.argv[1] == '--needs-tools':
+        print('yes' if needs_tools(sys.argv[2]) else 'no')
+        raise SystemExit(0)
     raise SystemExit(main(sys.argv[1], sys.argv[2]))
