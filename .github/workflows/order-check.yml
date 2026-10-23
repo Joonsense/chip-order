@@ -1,0 +1,55 @@
+# Instant check for order issues. The issue content is untrusted code, so it runs in a job with no token
+# permissions and no secrets; a second job with only issues: write posts the resulting Markdown as a comment.
+name: order check
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions: {}
+
+concurrency:
+  group: order-check-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    if: contains(github.event.issue.labels.*.name, 'order') || startsWith(github.event.issue.title, 'Order:')
+    runs-on: ubuntu-24.04
+    permissions: {}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq iverilog verilator yosys yosys-dev > /dev/null
+          python3 -m pip install --quiet --break-system-packages cocotb==2.1.0
+      - name: Check the order
+        run: python3 tools/check_order.py "$GITHUB_EVENT_PATH" result.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: result
+          path: result.md
+          retention-days: 3
+
+  comment:
+    needs: check
+    runs-on: ubuntu-24.04
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: result
+      - name: Post
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # neutralise @mentions and cap the size before posting untrusted text
+          sed 's/@/@\xe2\x80\x8b/g' result.md | head -c 60000 > body.md
+          gh issue comment "$ISSUE" -R "$REPO" --body-file body.md
