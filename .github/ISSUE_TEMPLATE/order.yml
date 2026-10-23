@@ -45,6 +45,15 @@ body:
       description: If you paste RTL, it is verified as is and the agent is not used
       render: verilog
   - type: textarea
+    id: pins
+    attributes:
+      label: Pin names (optional)
+      description: "One per line, for the datasheet. Unnamed pins get IN0..IN7, OUT0..OUT7, IO0..IO7."
+      placeholder: |
+        ui[0]: A
+        uo[0]: COUNT0
+        uio[7]: ERROR
+  - type: textarea
     id: notes
     attributes:
       label: Anything else

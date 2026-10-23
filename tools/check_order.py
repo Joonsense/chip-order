@@ -22,7 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 KIT = HERE / 'kit'
 FIELDS = {'Design name': 'name', 'spec.md': 'spec', 'model.py': 'model', 'Largest tile size you accept': 'tiles',
-          'Your own Verilog (optional)': 'rtl', 'Anything else': 'notes'}
+          'Your own Verilog (optional)': 'rtl', 'Pin names (optional)': 'pins', 'Anything else': 'notes'}
 ALLOWED_TASKS = {'$signed', '$unsigned', '$clog2', '$bits'}
 SEEDS = [42, 917, 2027]
 
